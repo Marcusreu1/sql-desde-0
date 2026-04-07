@@ -39,27 +39,26 @@ RESULTADO ESPERADO:
 -- PASO 4: GROUP BY para agrupar por cliente
 -- Necesitamos agrupar porque queremos contar visitas POR CADA cliente
 
--- PASO 5: SELECT con COUNT() para contar las visitas sin transacción
--- COUNT(v.visit_id) cuenta cuántas visitas sin transacción tiene cada cliente
+-- PASO 5: SELECT con COUNT(*) para contar las visitas sin transacción
+-- COUNT(*) cuenta todas las filas de cada grupo
 
-SELECT v.customer_id,                    -- Id del cliente
-       COUNT(v.visit_id)                 -- Cantidad de visitas sin transacción
-       AS count_no_trans                 -- Alias que pide el problema
-FROM Visits v                            -- Tabla principal: visitas
-LEFT JOIN Transactions t                 -- Traer info de transacciones
-    ON v.visit_id = t.visit_id           -- Condición de unión: misma visita
-WHERE t.transaction_id IS NULL           -- Filtrar: solo visitas SIN transacción
-GROUP BY v.customer_id;                  -- Agrupar por cliente
+SELECT customer_id,                                -- Id del cliente
+       COUNT(*) AS count_no_trans                  -- Cantidad de visitas sin transacción
+FROM Visits                                        -- Tabla principal: visitas
+LEFT JOIN Transactions                             -- Traer info de transacciones
+    ON Visits.visit_id = Transactions.visit_id     -- Condición de unión: misma visita
+WHERE Transactions.transaction_id IS NULL          -- Solo visitas SIN transacción
+GROUP BY customer_id;                              -- Agrupar por cliente
 
 /*
 POR QUÉ CADA PARTE:
 - FROM Visits: Es la tabla que contiene todas las visitas
 - LEFT JOIN Transactions: Trae las transacciones sin perder visitas sin transacción
-- ON v.visit_id = t.visit_id: Conecta ambas tablas por el id de la visita
-- WHERE t.transaction_id IS NULL: Filtra solo las visitas que NO tuvieron transacción
+- ON Visits.visit_id = Transactions.visit_id: Conecta ambas tablas por el id de la visita
+- WHERE Transactions.transaction_id IS NULL: Filtra solo las visitas sin transacción
   (patrón común: LEFT JOIN + IS NULL = encontrar registros sin coincidencia)
-- GROUP BY v.customer_id: Agrupa por cliente para contar por separado
-- COUNT(v.visit_id): Cuenta cuántas visitas sin transacción tiene cada cliente
+- GROUP BY customer_id: Agrupa por cliente para contar por separado
+- COUNT(*): Cuenta todas las filas de cada grupo
 
 CONCEPTOS UTILIZADOS:
 - SELECT (seleccionar columnas)
@@ -69,6 +68,5 @@ CONCEPTOS UTILIZADOS:
 - WHERE (filtrar filas con condiciones)
 - IS NULL (verificar valores nulos tras el LEFT JOIN)
 - GROUP BY (agrupar filas por una columna)
-- COUNT() (función de agregación para contar filas)
-- Alias de tablas (v, t) para simplificar la escritura
+- COUNT(*) (función de agregación para contar filas)
 */
